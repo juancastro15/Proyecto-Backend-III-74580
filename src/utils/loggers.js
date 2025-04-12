@@ -1,51 +1,40 @@
-import winston from "winston";
-import config from "../config/config.js";
+import winston from "winston"
 
-const customLevels = {
-  levels: {
-    fatal: 0,
-    error: 1,
-    warning: 2,
-    info: 3,
-    http: 4,
-    debug: 5,
-  },
-  colors: {
-    fatal: "red",
-    error: "magenta",
-    warning: "yellow",
-    info: "blue",
-    http: "white",
-    debug: "cyan",
-  },
-};
+const customLevelOptions = {
+    levels: {
+        fatal: 0,
+        error: 1,
+        warning: 2,
+        info: 3,
+        debug: 4
+    },
+    colors: {
+        fatal:'red',
+        error: 'magenta',
+        warning: 'yellow',
+        info: 'blue',
+        debug: 'white'
+    }
+}
 
 const logger = winston.createLogger({
-  levels: customLevels.levels,
-  transports: [
-    new winston.transports.File({
-      level: "info",
-      filename: "./src/logs/errors.log",
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
-    }),
-  ],
+    levels: customLevelOptions.levels,
+    transports: [
+        new winston.transports.Console({
+            level:'info',
+            format: winston.format.combine(
+                winston.format.colorize({
+                    colors: customLevelOptions.colors
+                }),
+                winston.format.simple()
+            )
+        }),
+        new winston.transports.File({
+            filename: './errors.log',
+            level: 'warning',
+            format: winston.format.simple()
+        })
+    ]
 });
-
-const consoleTransport = new winston.transports.Console({
-  level: "debug",
-  format: winston.format.combine(
-    winston.format.colorize({ colors: customLevels.colors }),
-    winston.format.timestamp(),
-    winston.format.simple()
-  ),
-});
-
-// Si estoy en el modo dev, agrego el transporte de consola
-if (config.mode == "dev") {
-  logger.add(consoleTransport);
-}
 
 export default logger;
